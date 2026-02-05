@@ -1,17 +1,3 @@
-[output]
-type = "qcow2"
-
-[os]
-rootfs = "ext4"
-
-[[os.mounts]]
+[[filesystems]]
 mountpoint = "/"
 type = "ext4"
-
-[[os.mounts]]
-mountpoint = "/boot"
-type = "ext4"
-
-[[os.mounts]]
-mountpoint = "/boot/efi"
-type = "vfat"

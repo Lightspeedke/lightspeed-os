@@ -1,0 +1,41 @@
+name: Build Lightspeed OS ISO
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_iso:
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout (not strictly required but good practice)
+        uses: actions/checkout@v4
+
+      - name: Install Podman
+        run: |
+          sudo apt update
+          sudo apt install -y podman
+
+      - name: Pull Lightspeed OS image
+        run: |
+          podman pull ghcr.io/lightspeedke/lightspeed-os:latest
+
+      - name: Build ISO with bootc-image-builder
+        run: |
+          mkdir -p out
+          podman run --rm --privileged \
+            -v $(pwd)/out:/out \
+            ghcr.io/ublue-os/bootc-image-builder:latest \
+            --type iso \
+            --image ghcr.io/lightspeedke/lightspeed-os:latest \
+            --output /out
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lightspeed-os-iso
+          path: out/*.iso

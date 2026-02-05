@@ -9,11 +9,9 @@ on:
 permissions:
   contents: read
   packages: read
-  id-token: write
 
 jobs:
   build-iso:
-    name: Build ISO
     runs-on: ubuntu-24.04
 
     steps:
@@ -27,11 +25,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Prepare output directory
-        run: |
-          mkdir -p out
+      - name: Create output directory
+        run: mkdir -p out
 
-      - name: Build ISO using bootc-image-builder
+      - name: Build ISO
         run: |
           podman run --rm --privileged \
             -v $PWD/out:/out \
@@ -40,13 +37,11 @@ jobs:
             ghcr.io/build254kenya/lightspeed-os:latest \
             --output /out
 
-      - name: List output files (debug)
-        run: |
-          ls -lh out
+      - name: Show output
+        run: ls -lh out
 
       - name: Upload ISO artifact
         uses: actions/upload-artifact@v4
         with:
           name: lightspeed-os-iso
           path: out/*.iso
-          retention-days: 7

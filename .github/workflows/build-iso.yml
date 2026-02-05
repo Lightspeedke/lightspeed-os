@@ -1,0 +1,29 @@
+name: Build Lightspeed OS ISO
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_iso:
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build ISO from existing image
+        uses: ublue-os/bootc-image-builder@v1
+        with:
+          image: ghcr.io/build254kenya/lightspeed-os:latest
+          type: iso
+          config-file: disk_config/iso.toml
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lightspeed-os-iso
+          path: output/*.iso

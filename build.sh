@@ -3,7 +3,7 @@ set -e
 
 echo "=============================="
 echo " Building Lightspeed OS"
-echo " Debloat + Performance"
+echo " Debloat + Performance + Boot"
 echo "=============================="
 
 # --------------------------------
@@ -49,8 +49,6 @@ rpm-ostree override remove \
 # --------------------------------
 # ZRAM (RAM compression)
 # --------------------------------
-echo "Configuring zram"
-
 cat <<EOF >/etc/systemd/zram-generator.conf
 [zram0]
 zram-size = ram / 2
@@ -68,7 +66,7 @@ vm.vfs_cache_pressure=50
 EOF
 
 # --------------------------------
-# IO scheduler (SSD-friendly)
+# IO scheduler (SSD friendly)
 # --------------------------------
 mkdir -p /etc/udev/rules.d
 cat <<EOF >/etc/udev/rules.d/60-ioschedulers.rules
@@ -86,6 +84,22 @@ SystemMaxUse=200M
 EOF
 
 # --------------------------------
+# Plymouth boot video (Lightspeed)
+# --------------------------------
+echo "Installing Lightspeed boot animation"
+
+mkdir -p /usr/share/plymouth/themes/lightspeed
+cp -r /ctx/plymouth/lightspeed/* /usr/share/plymouth/themes/lightspeed/
+
+mkdir -p /etc/plymouth
+cat <<EOF >/etc/plymouth/plymouthd.conf
+[Daemon]
+DeviceTimeout=8
+EOF
+
+plymouth-set-default-theme -R lightspeed
+
+# --------------------------------
 # Finish
 # --------------------------------
-echo "Lightspeed OS performance tuning complete"
+echo "Lightspeed OS build complete"

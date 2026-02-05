@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Lightspeed OS
+Description=Lightspeed OS boot animation
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/lightspeed
+ScriptFile=/usr/share/plymouth/themes/lightspeed/lightspeed.script

@@ -1,0 +1,4 @@
+video = Video("boot.ogv");
+video.SetPosition(0, 0);
+video.SetScale(1, 1);
+video.Play();

@@ -5,10 +5,16 @@ COPY build_files /
 # Base Image
 FROM ghcr.io/ublue-os/bluefin:latest
 
+# ===== Lightspeed OS Branding =====
+LABEL org.opencontainers.image.title="Lightspeed OS"
+LABEL org.opencontainers.image.description="Lightspeed OS – fast, clean, GNOME-based system"
+LABEL org.opencontainers.image.vendor="Lightspeed Labz"
+LABEL org.opencontainers.image.version="0.1"
+
 ## Other possible base images include:
 # FROM ghcr.io/ublue-os/bazzite:latest
 # FROM ghcr.io/ublue-os/bluefin-nvidia:stable
-# 
+#
 # ... and so on, here are more base images
 # Universal Blue Images: https://github.com/orgs/ublue-os/packages
 # Fedora base image: quay.io/fedora/fedora-bootc:41
@@ -34,7 +40,7 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=cache,dst=/var/log \
     --mount=type=tmpfs,dst=/tmp \
     /ctx/build.sh
-    
+
 ### LINTING
 ## Verify final image and contents are correct.
 RUN bootc container lint

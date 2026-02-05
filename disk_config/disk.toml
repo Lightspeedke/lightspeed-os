@@ -1,3 +1,36 @@
-[[customizations.filesystem]]
+[image]
+name = "lightspeed-os"
+
+[[disk]]
+device = "disk"
+size = "20GiB"
+
+# EFI System Partition
+[[disk.partition]]
+label = "efi"
+size = "512MiB"
+type = "efi"
+
+# Boot partition
+[[disk.partition]]
+label = "boot"
+size = "1GiB"
+type = "linux"
+
+# Root partition
+[[disk.partition]]
+label = "root"
+size = "100%"
+type = "linux"
+
+# Filesystem for /boot
+[[filesystem]]
+mountpoint = "/boot"
+device = "boot"
+type = "ext4"
+
+# Filesystem for /
+[[filesystem]]
 mountpoint = "/"
-minsize = "20 GiB"
+device = "root"
+type = "ext4"

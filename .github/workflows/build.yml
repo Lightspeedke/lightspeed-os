@@ -6,7 +6,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: '05 10 * * *'  # 10:05 UTC daily
+    - cron: '05 10 * * *' # 10:05 UTC daily
   push:
     branches:
       - main
@@ -99,7 +99,7 @@ jobs:
 
       - name: Install Cosign
         if: github.event_name != 'pull_request'
-        uses: sigstore/cosign-installer@v4
+        uses: sigstore/cosign-installer@v3
 
       - name: Sign container image
         if: github.event_name != 'pull_request'

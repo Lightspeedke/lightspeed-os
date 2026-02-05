@@ -1,4 +1,3 @@
----
 name: Build container image (Lightspeed OS)
 
 on:
@@ -6,7 +5,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: '05 10 * * *' # 10:05 UTC daily
+    - cron: '05 10 * * *'
   push:
     branches:
       - main
@@ -100,13 +99,19 @@ jobs:
       - name: Install Cosign
         if: github.event_name != 'pull_request'
         uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.5.2'
 
       - name: Sign container image
         if: github.event_name != 'pull_request'
+        shell: bash
         run: |
           IMAGE="${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}"
-          for tag in ${{ steps.metadata.outputs.tags }}; do
-            cosign sign -y --key env://COSIGN_PRIVATE_KEY $IMAGE:$tag
+          echo "${{ steps.metadata.outputs.tags }}" | while read -r tag; do
+            if [ -n "$tag" ]; then
+              echo "Signing $IMAGE:$tag"
+              cosign sign -y --key env://COSIGN_PRIVATE_KEY "$IMAGE:$tag"
+            fi
           done
         env:
           COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}

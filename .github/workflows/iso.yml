@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout (not strictly required but good practice)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install Podman
         run: |

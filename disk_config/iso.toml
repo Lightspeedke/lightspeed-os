@@ -1,14 +1,1 @@
-[image]
-image = "ghcr.io/build254kenya/lightspeed-os:latest"
-
-[iso]
-volume_id = "LIGHTSPEED_OS"
-installer = "anaconda"
-
-[system]
-hostname = "lightspeed"
-
-[user]
-name = "lightspeed"
-password = "lightspeed"
-groups = ["wheel"]
+# intentionally empty

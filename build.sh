@@ -1,87 +1,36 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 echo "=============================="
-echo " Building Lightspeed OS"
-echo " Debloat + Performance + Boot"
+echo " Lightspeed OS build starting "
 echo "=============================="
 
 # --------------------------------
-# OS Identity
+# Network-safe DNF configuration
 # --------------------------------
-cat <<EOF >/usr/lib/os-release
-NAME="Lightspeed OS"
-PRETTY_NAME="Lightspeed OS (GNOME)"
-ID=lightspeed
-ID_LIKE=fedora
-VERSION_ID=0.1
-VERSION="0.1 (Lightspeed)"
-PLATFORM_ID="platform:f41"
-ANSI_COLOR="0;36"
-LOGO=fedora-logo-icon
-HOME_URL="https://github.com/Lightspeedke/lightspeed-os"
-SUPPORT_URL="https://github.com/Lightspeedke/lightspeed-os/issues"
-BUG_REPORT_URL="https://github.com/Lightspeedke/lightspeed-os/issues"
-EOF
+echo "Configuring DNF for reliable builds"
 
-hostnamectl set-hostname lightspeed
+# Disable slow / flaky third-party repos
+dnf5 config-manager --set-disabled negativo17* || true
+
+# Ensure core Fedora repos are enabled
+dnf5 config-manager --set-enabled fedora updates updates-archive || true
+
+# Clean metadata
+dnf5 clean all
 
 # --------------------------------
-# Boot optimizations
+# Base packages
 # --------------------------------
-systemctl disable NetworkManager-wait-online.service || true
+echo "Installing base packages"
 
-# --------------------------------
-# GNOME Debloat (SAFE)
-# --------------------------------
-rpm-ostree override remove \
-  gnome-tour \
-  gnome-contacts \
-  gnome-weather \
-  gnome-maps \
-  gnome-characters \
-  gnome-clocks \
-  gnome-connections \
-  yelp \
-  cheese \
-  simple-scan || true
-
-# --------------------------------
-# ZRAM (RAM compression)
-# --------------------------------
-cat <<EOF >/etc/systemd/zram-generator.conf
-[zram0]
-zram-size = ram / 2
-compression-algorithm = zstd
-swap-priority = 100
-EOF
-
-# --------------------------------
-# VM & Memory tuning
-# --------------------------------
-mkdir -p /etc/sysctl.d
-cat <<EOF >/etc/sysctl.d/99-lightspeed.conf
-vm.swappiness=10
-vm.vfs_cache_pressure=50
-EOF
-
-# --------------------------------
-# IO scheduler (SSD friendly)
-# --------------------------------
-mkdir -p /etc/udev/rules.d
-cat <<EOF >/etc/udev/rules.d/60-ioschedulers.rules
-ACTION=="add|change", KERNEL=="nvme*n*", ATTR{queue/scheduler}="none"
-ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/scheduler}="mq-deadline"
-EOF
-
-# --------------------------------
-# Journal size limit
-# --------------------------------
-mkdir -p /etc/systemd/journald.conf.d
-cat <<EOF >/etc/systemd/journald.conf.d/size.conf
-[Journal]
-SystemMaxUse=200M
-EOF
+dnf5 install -y \
+  --setopt=timeout=60 \
+  --setopt=retries=5 \
+  tmux \
+  curl \
+  wget \
+  vim
 
 # --------------------------------
 # Plymouth boot video (Lightspeed)
@@ -89,17 +38,30 @@ EOF
 echo "Installing Lightspeed boot animation"
 
 mkdir -p /usr/share/plymouth/themes/lightspeed
-cp -r /ctx/plymouth/lightspeed/* /usr/share/plymouth/themes/lightspeed/
 
-mkdir -p /etc/plymouth
-cat <<EOF >/etc/plymouth/plymouthd.conf
-[Daemon]
-DeviceTimeout=8
-EOF
+# Expecting your repo layout:
+# plymouth/
+# └── lightspeed/
+#     ├── lightspeed.plymouth
+#     ├── lightspeed.script
+#     └── boot.mp4
+
+cp -r /ctx/plymouth/lightspeed/* /usr/share/plymouth/themes/lightspeed/
 
 plymouth-set-default-theme -R lightspeed
 
 # --------------------------------
-# Finish
+# System identity
 # --------------------------------
-echo "Lightspeed OS build complete"
+echo "Setting Lightspeed OS identity"
+
+cat <<EOF > /etc/os-release
+NAME="Lightspeed OS"
+ID=lightspeed
+PRETTY_NAME="Lightspeed OS"
+VERSION="0.1"
+EOF
+
+echo "=============================="
+echo " Lightspeed OS build complete "
+echo "=============================="

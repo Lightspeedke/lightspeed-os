@@ -1,46 +1,38 @@
 name: Build Lightspeed OS ISO
-
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
-
 permissions:
   contents: read
   packages: read
-
 jobs:
   build-iso:
     runs-on: ubuntu-24.04
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Prepare output dir
         run: mkdir -p out
-
       - name: Build ISO with bootc
         run: |
           podman run --rm --privileged \
             -v "$PWD/out:/out" \
             quay.io/centos-bootc/bootc-image-builder:latest \
             --type iso \
+            --rootfs xfs \
             ghcr.io/build254kenya/lightspeed-os:latest \
             --output /out
-
       - name: DEBUG – show output
         run: |
           echo "==== /out contents ===="
           find out -maxdepth 3 -type f -ls
-
       - name: Upload ISO artifacts
         uses: actions/upload-artifact@v4
         with:

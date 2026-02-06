@@ -34,7 +34,7 @@ jobs:
           echo "==== /out contents ===="
           find out -maxdepth 3 -type f -ls
       - name: Upload ISO artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: lightspeed-os-iso
           path: out/**
